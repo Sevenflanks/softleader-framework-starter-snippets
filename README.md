@@ -10,10 +10,15 @@
 2. Clone fork 版本到你的 local。
 3. 修改 local 的內容。
 4. Commit 且 push 修改的內容到 remote。
-5. 送 Pull request 回 starter-snippets。
+5. 送 Pull request (PR) 回 starter-snippets。
 
 ### Make sure that..
 
-- 所有範例程式碼必須都要有對應的 Test case。
-- PR 是否會收錄回 master 將由 RD 進行審查，因此 PR 的內容越詳細越好。
+- 為了範例程式要可以夠共用, 原則上以**不異動既有的`pom.xml`為主**。
+	- 若你的程式碼範例需要異動既有的`pom.xml`請先找 RD 成員討論。
+	- 若你直接送 PR 將有很大機率被忽略。
+- 所有範例程式碼**必須**要有:
+	- 對應的 Test case。
+	- 並且有完整且足夠的 assertion。
+- PR 是否會收錄回 master 將由 RD 進行審查後決定，因此 PR 的內容請敘述的越詳細越好。
 
