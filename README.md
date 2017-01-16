@@ -4,6 +4,8 @@
 
 ## Get involved
 
+![](/flow.png)
+
 你可以依照以下流程, 貢獻你的程式碼：
 
 1. Fork `softleader-framework-starter-snippets` 到你的 GitHub 帳號下。
