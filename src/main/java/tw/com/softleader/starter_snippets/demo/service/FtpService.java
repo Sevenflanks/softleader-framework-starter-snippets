@@ -23,10 +23,15 @@ import lombok.extern.slf4j.Slf4j;
 @Validated
 public class FtpService {
 
-	private final static String FTP_PATH = "/testFtp";
-	private final static String SFTP_PATH = "/testSftp";
-
-	public void uploadFileToFtp(final InputStream fileInputStream, final String fileName, final String hostname, final String username, final String password) {
+	/**
+	 * 將檔案放置到 FTP server
+	 * @param fileInputStream
+	 * @param fileName
+	 * @param hostname
+	 * @param username
+	 * @param password
+	 */
+	public void uploadFileToFtp(final InputStream fileInputStream, final String fileName, final String ftpPath, final String hostname, final String username, final String password) {
 		final StopWatch sw = new StopWatch();
 		sw.start();
 		final FTPClient ftpClient = new FTPClient();
@@ -38,7 +43,7 @@ public class FtpService {
 			ftpClient.setControlEncoding("utf-8");
 			// 設置檔案類型（二進位）
 			ftpClient.setFileType(FTPClient.BINARY_FILE_TYPE);
-			ftpClient.changeWorkingDirectory(FTP_PATH);
+			ftpClient.changeWorkingDirectory(ftpPath);
 			ftpClient.storeFile(fileName, fileInputStream);
 
 		} catch (IOException e) {
@@ -54,7 +59,15 @@ public class FtpService {
 		log.info("{} uploadFtp cost: {}", fileName, sw);
 	}
 	
-	public InputStream getFileFromFtp(final String fileName, final String hostname, final String username, final String password){
+	/**
+	 * 從FTP sever 取得檔案
+	 * @param fileName
+	 * @param hostname
+	 * @param username
+	 * @param password
+	 * @return
+	 */
+	public InputStream getFileFromFtp(final String fileName, final String ftpPath, final String hostname, final String username, final String password){
 		final StopWatch sw = new StopWatch();
 		sw.start();
 		final FTPClient ftpClient = new FTPClient();
@@ -63,7 +76,7 @@ public class FtpService {
 			ftpClient.connect(hostname);
 			ftpClient.login(username, password);
 			// 設置檔案位置
-			ftpClient.changeWorkingDirectory(FTP_PATH);
+			ftpClient.changeWorkingDirectory(ftpPath);
 			// 取得檔案
 			is = ftpClient.retrieveFileStream(fileName);
 
@@ -81,9 +94,15 @@ public class FtpService {
 		return is;
 	}
 	
-	
-
-	public void uploadFileToSftp(final InputStream fileInputStream, final String fileName, final String host, final String username, final String password) {
+	/**
+	 * 放置檔案到SFTP server
+	 * @param fileInputStream
+	 * @param fileName
+	 * @param host
+	 * @param username
+	 * @param password
+	 */
+	public void uploadFileToSftp(final InputStream fileInputStream, final String fileName, final String sftpPath, final String host, final String username, final String password) {
 		final StopWatch sw = new StopWatch();
 		sw.start();
 		final int port = 22;
@@ -102,7 +121,7 @@ public class FtpService {
 			channel = session.openChannel("sftp");
 			channel.connect();
 			channelSftp = (ChannelSftp) channel;
-			channelSftp.cd(SFTP_PATH);
+			channelSftp.cd(sftpPath);
 			channelSftp.put(fileInputStream, fileName);
 			channelSftp.exit();
 		} catch (Exception e) {
@@ -120,6 +139,58 @@ public class FtpService {
 		}
 		sw.stop();
 		log.info("{} uploadSftp cost: {}", fileName, sw);
+	}
+	
+	/**
+	 * 從SFTP server 取得 檔案
+	 * @param fileName
+	 * @param hostname
+	 * @param username
+	 * @param password
+	 * @return
+	 */
+	public InputStream getFileFromSftp(final String fileName, final String sftpPath, final String hostname, final String username, final String password){
+		final int port = 22;
+		Session session = null;
+		Channel channel = null;
+		ChannelSftp channelSftp = null;
+		InputStream is = null;
+		try {
+			final JSch jsch = new JSch();
+			session = jsch.getSession(username, hostname, port);
+			session.setPassword(password);
+			java.util.Properties config = new java.util.Properties();
+			config.put("StrictHostKeyChecking", "no");
+			session.setConfig(config);
+			session.connect();
+			channel = session.openChannel("sftp");
+			channel.connect();
+			channelSftp = (ChannelSftp) channel;
+			channelSftp.cd(sftpPath);
+			
+			try {
+				is = channelSftp.get(fileName);
+			}
+			catch (Exception e) {
+				log.error("file is not exists. {}", fileName, e);
+			}
+			channelSftp.exit();
+		}
+		catch (Exception ex) {
+			log.error("{}: {}", fileName, ex.getMessage(), ex);
+		}
+		finally{
+			if (channelSftp != null && channelSftp.isConnected()) {
+				channelSftp.disconnect();
+			}
+			if (channel != null && channel.isConnected()) {
+				channel.disconnect();
+			}
+			if (session != null && session.isConnected()) {
+				session.disconnect();
+			}
+		}
+		return is;
 	}
 
 }

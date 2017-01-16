@@ -1,10 +1,5 @@
 package tw.com.softleader.starter_snippets.demo.service;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
 import java.io.InputStream;
 
 import org.apache.commons.io.IOUtils;
@@ -31,43 +26,46 @@ public class FtpServiceTest {
 
 	@Autowired
 	private FtpService ftpService;
+	
+	private final static String UTF_8 = "UTF-8";
+	private final static String FTP_PATH = "/testFtp";
+//	private final static String SFTP_PATH = "/testSftp";
 
 	@Test
-	public void testUploadFtp() {
+	public void testUploadFtpAndGetFile() {
 		// host: softleader.com.tw
 		final String hostname = "118.163.91.247";
 		final String username = "test";
 		final String password = "test";
-		final String fileName = "test.txt";
+		final String fileName = "testFtp.txt";
+		final String exampleString = "THIS IS A SAMPLE, 這是範例";
 
+		InputStream fileInputStream = null;
 		try {
-			log.info("start load file: {}", fileName);
-			final InputStream fileInputStream = new FileInputStream(new File("D:\\PLA\\test.txt"));
-			try {
-				ftpService.uploadFileToFtp(fileInputStream, fileName, hostname, username, password);
-			} catch (Exception e1) {
-				log.error(e1.getMessage(), e1);
-			}finally{
-				IOUtils.closeQuietly(fileInputStream);
-			}
-			log.info("finish uploadFtp: {}", fileName);
-			
-			log.info("start getFileFromFtp: {}", fileName);
-			final InputStream fileFromFtp = ftpService.getFileFromFtp(fileName, hostname, username, password);
-			Assert.assertNotNull(fileFromFtp);
-			final FileOutputStream fos = new FileOutputStream("D:\\PLA\\getTest.txt");
-			try {
-				IOUtils.write(IOUtils.toByteArray(fileFromFtp), fos);
-			} catch (IOException e) {
-				log.error(e.getMessage(), e);
-			}finally{
-				IOUtils.closeQuietly(fileFromFtp);
-				IOUtils.closeQuietly(fos);
-			}
-			log.info("finish getFileFromFtp: {}", fileName);
-		} catch (FileNotFoundException e) {
+			fileInputStream = IOUtils.toInputStream(exampleString, UTF_8);
+			ftpService.uploadFileToFtp(fileInputStream, fileName, FTP_PATH, hostname, username, password);
+		} catch (Exception e1) {
+			log.error(e1.getMessage(), e1);
+			Assert.assertNull(e1);
+		}finally{
+			IOUtils.closeQuietly(fileInputStream);
+		}
+		
+		InputStream fileFromFtp = null;
+		try {
+			fileFromFtp = ftpService.getFileFromFtp(fileName, FTP_PATH, hostname, username, password);
+			final String theString = IOUtils.toString(fileFromFtp, UTF_8); 
+			Assert.assertTrue(exampleString.equals(theString));
+		} catch (Exception e) {
 			log.error(e.getMessage(), e);
+			Assert.assertNull(e);
+		}finally{
+			IOUtils.closeQuietly(fileFromFtp);
 		}
 	}
-
+	
+	@Test
+	public void testUploadSftpAndGetFile() {
+		
+	}
 }
