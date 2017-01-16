@@ -22,6 +22,6 @@
 - 所有範例程式碼**必須**要有:
 	- 每個 method 都要有至少 1 個以上對應的 Test case。
 	- 每個 Test case 都要有完整且足夠的 assertion。
-- PR 中不可包含任何個人環境的設定 (例如 datasource.properties)
+- PR 中不可包含任何個人環境的設定 (例如 `datasource.properties`)
 - PR 是否會收錄回 master 將由 RD 進行審查後決定，因此 PR 的內容請敘述的越詳細越好。
 
