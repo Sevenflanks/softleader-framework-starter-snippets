@@ -25,8 +25,10 @@ public class FtpService {
 
 	/**
 	 * 將檔案放置到 FTP server
+	 * 
 	 * @param fileInputStream
 	 * @param fileName
+	 * @param ftpPath
 	 * @param hostname
 	 * @param username
 	 * @param password
@@ -61,7 +63,9 @@ public class FtpService {
 	
 	/**
 	 * 從FTP sever 取得檔案
+	 * 
 	 * @param fileName
+	 * @param ftpPath
 	 * @param hostname
 	 * @param username
 	 * @param password
@@ -96,8 +100,10 @@ public class FtpService {
 	
 	/**
 	 * 放置檔案到SFTP server
+	 * 
 	 * @param fileInputStream
 	 * @param fileName
+	 * @param sftpPath
 	 * @param host
 	 * @param username
 	 * @param password
@@ -143,7 +149,9 @@ public class FtpService {
 	
 	/**
 	 * 從SFTP server 取得 檔案
+	 * 
 	 * @param fileName
+	 * @param sftpPath
 	 * @param hostname
 	 * @param username
 	 * @param password
