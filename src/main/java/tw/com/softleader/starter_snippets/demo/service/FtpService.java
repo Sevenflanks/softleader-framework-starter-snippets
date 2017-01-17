@@ -3,6 +3,7 @@ package tw.com.softleader.starter_snippets.demo.service;
 import java.io.IOException;
 import java.io.InputStream;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.time.StopWatch;
 import org.apache.commons.net.ftp.FTPClient;
 import org.springframework.stereotype.Service;
@@ -104,21 +105,21 @@ public class FtpService {
 	 * @param fileInputStream
 	 * @param fileName
 	 * @param sftpPath
-	 * @param host
+	 * @param hostname
+	 * @param port
 	 * @param username
 	 * @param password
 	 */
-	public void uploadFileToSftp(final InputStream fileInputStream, final String fileName, final String sftpPath, final String host, final String username, final String password) {
+	public void uploadFileToSftp(final InputStream fileInputStream, final String fileName, final String sftpPath, final String hostname, final int port, final String username, final String password) {
 		final StopWatch sw = new StopWatch();
 		sw.start();
-		final int port = 22;
 		Session session = null;
 		Channel channel = null;
 		ChannelSftp channelSftp = null;
 
 		try {
 			JSch jsch = new JSch();
-			session = jsch.getSession(username, host, port);
+			session = jsch.getSession(username, hostname, port);
 			session.setPassword(password);
 			java.util.Properties config = new java.util.Properties();
 			config.put("StrictHostKeyChecking", "no");
@@ -153,12 +154,12 @@ public class FtpService {
 	 * @param fileName
 	 * @param sftpPath
 	 * @param hostname
+	 * @param port
 	 * @param username
 	 * @param password
 	 * @return
 	 */
-	public InputStream getFileFromSftp(final String fileName, final String sftpPath, final String hostname, final String username, final String password){
-		final int port = 22;
+	public InputStream getFileFromSftp(final String fileName, final String sftpPath, final String hostname, final int port, final String username, final String password){
 		Session session = null;
 		Channel channel = null;
 		ChannelSftp channelSftp = null;
@@ -175,12 +176,15 @@ public class FtpService {
 			channel.connect();
 			channelSftp = (ChannelSftp) channel;
 			channelSftp.cd(sftpPath);
-			
+			InputStream sftpIs = null;
 			try {
-				is = channelSftp.get(fileName);
+				sftpIs = channelSftp.get(fileName);
+				is = IOUtils.toBufferedInputStream(sftpIs);
 			}
 			catch (Exception e) {
 				log.error("file is not exists. {}", fileName, e);
+			}finally{
+				IOUtils.closeQuietly(sftpIs);
 			}
 			channelSftp.exit();
 		}

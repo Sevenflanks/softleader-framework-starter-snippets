@@ -29,7 +29,7 @@ public class FtpServiceTest {
 	
 	private final static String UTF_8 = "UTF-8";
 	private final static String FTP_PATH = "/testFtp";
-//	private final static String SFTP_PATH = "/testSftp";
+	private final static String SFTP_PATH = "/testSftp";
 
 	@Test
 	public void testUploadFtpAndGetFile() {
@@ -40,6 +40,7 @@ public class FtpServiceTest {
 		final String fileName = "testFtp.txt";
 		final String exampleString = "THIS IS A SAMPLE, 這是範例";
 
+		// upload
 		InputStream fileInputStream = null;
 		try {
 			fileInputStream = IOUtils.toInputStream(exampleString, UTF_8);
@@ -51,6 +52,7 @@ public class FtpServiceTest {
 			IOUtils.closeQuietly(fileInputStream);
 		}
 		
+		// get file
 		InputStream fileFromFtp = null;
 		try {
 			fileFromFtp = ftpService.getFileFromFtp(fileName, FTP_PATH, hostname, username, password);
@@ -66,6 +68,38 @@ public class FtpServiceTest {
 	
 	@Test
 	public void testUploadSftpAndGetFile() {
+		// host: softleader.com.tw
+		final String hostname = "118.163.91.247";
+		// default: 22
+		final int port = 2223;
+		final String username = "test";
+		final String password = "test";
+		final String fileName = "testSftp.txt";
+		final String exampleString = "THIS IS A SAMPLE, 這是範例";
 		
+		// upload
+		InputStream fileInputStream = null;
+		try {
+			fileInputStream = IOUtils.toInputStream(exampleString, UTF_8);
+			ftpService.uploadFileToSftp(fileInputStream, fileName, SFTP_PATH, hostname, port, username, password);
+		} catch (Exception e1) {
+			log.error(e1.getMessage(), e1);
+			Assert.assertNull(e1);
+		}finally{
+			IOUtils.closeQuietly(fileInputStream);
+		}
+		
+		// get file
+		InputStream fileFromFtp = null;
+		try {
+			fileFromFtp = ftpService.getFileFromSftp(fileName, SFTP_PATH, hostname, port, username, password);
+			final String theString = IOUtils.toString(fileFromFtp, UTF_8); 
+			Assert.assertTrue(exampleString.equals(theString));
+		} catch (Exception e) {
+			log.error(e.getMessage(), e);
+			Assert.assertNull(e);
+		}finally{
+			IOUtils.closeQuietly(fileFromFtp);
+		}
 	}
 }
